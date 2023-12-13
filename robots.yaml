@@ -1,0 +1,37 @@
+robots:
+  # name of each robot
+  - name: swarm151
+    ip: 192.168.101.151
+    sensor: realsense
+
+  - name: swarm152
+    ip: 192.168.101.152
+    sensor: realsense
+
+  - name: swarm153
+    ip: 192.168.101.153
+    sensor: realsense
+
+  - name: swarm154
+    ip: 192.168.101.154
+    sensor: realsense
+
+  - name: swarm155
+    ip: 192.168.101.155
+    sensor: realsense
+
+  - name: swarm157
+    ip: 192.168.101.157
+    sensor: lidar
+
+  - name: swarm158
+    ip: 192.168.101.158
+    sensor: lidar
+
+  - name: swarm156
+    ip: 192.168.101.156
+    sensor: coax
+
+  - name: swarm159
+    ip: 192.168.101.159
+    sensor: coax
