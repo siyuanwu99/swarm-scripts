@@ -1,45 +1,5 @@
 #!/bin/bash
 
-# Function to manage robot sessions
-run_commands() {
-	local robot_name=$1
-	local robot_ip=$2
-	local robot_sensor=$3
-	# Insert logic to start, monitor, and terminate sessions
-	# Make use of robot_name, robot_ip, and robot_sensor as needed
-
-	# Commands to run depending on the group
-	if [ "$robot_sensor" == "realsense" ]; then
-		echo "---------- $robot_name ----------"
-		echo "IP: $robot_ip"
-		echo "Sensor: $robot_sensor"
-		# SSH and tmux session configuration
-		ssh -t "nv@$robot_ip" "
-						tmux send-keys -t $robot_name:1.7 C-c C-m
-						tmux send-keys -t $robot_name:1.7 'gvio' C-m
-						echo '[$robot_name] VINS started'
-        		exit;
-    		"
-	fi
-}
-
-kill_commands() {
-	local robot_name=$1
-	local robot_ip=$2
-	local robot_sensor=$3
-	# Insert logic to start, monitor, and terminate sessions
-	# Make use of robot_name, robot_ip, and robot_sensor as needed
-
-	# Commands to run depending on the group
-	if [ "$robot_sensor" == "realsense" ]; then
-		# SSH and tmux session configuration
-		ssh -t "nv@$robot_ip" "
-						tmux send-keys -t $robot_name:1.7 C-c C-m
-						echo '[$robot_name] VINS started'
-        		exit;
-    		"
-	fi
-}
 # Function to display help message
 show_help() {
 	echo "Usage: $0 [options]"
@@ -93,9 +53,6 @@ while [[ "$#" -gt 0 ]]; do
 		ROBOT_FILE="$2"
 		shift
 		;;
-	-k | --kill)
-		KILL=1
-		;;
 	-n | --name)
 		ROBOT_NAME="$2"
 		shift
@@ -118,16 +75,7 @@ while IFS=, read -r name ip sensor; do
 	fi
 
 	echo "$name $ip $sensor"
-	if [ "$KILL" -eq 0 ]; then
-		if [ "$sensor" == "realsense" ]; then
-			run_commands "$name" "$ip" "$sensor" &
-		fi
-	else
-		echo "Killing"
-		if [ "$sensor" == "realsense" ]; then
-			kill_commands "$name" "$ip" "$sensor" &
-		fi
-	fi
+	ssh -t "nv@$ip" " echo nv | sudo -S ntpdate -u 192.168.101.138" &
 done <"$ROBOT_FILE"
 
 wait

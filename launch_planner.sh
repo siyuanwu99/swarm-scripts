@@ -11,13 +11,8 @@ run_planner() {
 	# Make use of robot_name, robot_ip, and robot_sensor as needed
 
 	# Commands to run depending on the group
-	echo "---------- $robot_name ----------"
-	echo "IP: $robot_ip"
-	echo "Sensor: $robot_sensor"
-	# SSH and tmux session configuration
 
 	cmd="roslaunch exploration_manager run_onboard.launch drone_id:=$id drone_num:=$num"
-	echo $cmd
 	ssh -Tq "nv@$robot_ip" "
 					tmux send-keys -t $name:1.1 '$cmd' C-m
 					echo '[$name] Planner started.'
@@ -32,9 +27,6 @@ kill_commands() {
 	# Make use of robot_name, robot_ip, and robot_sensor as needed
 
 	# Commands to run depending on the group
-	echo "---------- $robot_name ----------"
-	echo "IP: $robot_ip"
-	echo "Sensor: $robot_sensor"
 	# SSH and tmux session configuration
 	ssh -Tq "nv@$robot_ip" "
 						tmux send-keys -t $robot_name:1.1 C-c C-m
@@ -102,12 +94,12 @@ done
 
 # Validate and process the robot list file
 validate_file "$ROBOT_FILE"
-ID=0
 
 # count number of robots (lines)
 NUM=$(wc -l <"$ROBOT_FILE")
+ID=0
 
-while IFS=, read -r name ip sensor; do
+cat "$ROBOT_FILE" | while IFS=, read -r name ip sensor; do
 
 	# Run commands only for the specified robot if ROBOT_NUMBER is set
 	if [[ -n $ROBOT_NAME && $name != "swarm$ROBOT_NAME" ]]; then
@@ -118,9 +110,11 @@ while IFS=, read -r name ip sensor; do
 	echo "$name $ip $sensor"
 
 	if [ "$KILL" -eq 0 ]; then
-		run_planner "$name" "$ip" "$sensor" "$ID" "$NUM"
+		run_planner "$name" "$ip" "$sensor" "$ID" "$NUM" &
 	else
 		echo "Killing $name"
-		kill_commands "$name" "$ip" "$sensor"
+		kill_commands "$name" "$ip" "$sensor" &
 	fi
-done <"$ROBOT_FILE"
+done
+
+wait

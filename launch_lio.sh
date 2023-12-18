@@ -9,12 +9,11 @@ run_commands() {
 	# Make use of robot_name, robot_ip, and robot_sensor as needed
 
 	# Commands to run depending on the group
-	if [ "$robot_sensor" == "realsense" ]; then
-		echo "---------- $robot_name ----------"
-		echo "IP: $robot_ip"
-		echo "Sensor: $robot_sensor"
-		# SSH and tmux session configuration
-		ssh -t "nv@$robot_ip" "
+	echo "---------- $robot_name ----------"
+	echo "IP: $robot_ip"
+	echo "Sensor: $robot_sensor"
+	# SSH and tmux session configuration
+	ssh -t "nv@$robot_ip" "
 						tmux send-keys -t $name:1.6 C-c C-m
 						tmux send-keys -t $name:1.7 C-c C-m
 						tmux send-keys -t $name:1.6 'lio' C-m
@@ -23,9 +22,6 @@ run_commands() {
         		exit;
  
     		"
-	else
-		return
-	fi
 }
 
 kill_commands() {
@@ -118,20 +114,20 @@ while IFS=, read -r name ip sensor; do
 		continue
 	fi
 
-	echo "$name $ip $sensor"
-
 	if [ "$KILL" -eq 0 ]; then
-		if [ "$sensor" == "lidar" ]; then
+		if [ "$sensor" == "lidar" ] || [ "$sensor" == "coax" ]; then
 			run_commands "$name" "$ip" "$sensor"
 		else
 			continue
 		fi
 	else
 		echo "Killing $name"
-		if [ "$sensor" == "lidar" ]; then
+		if [ "$sensor" == "lidar" ] || [ "$sensor" == "coax" ]; then
 			kill_commands "$name" "$ip" "$sensor"
 		else
 			continue
 		fi
 	fi
 done <"$ROBOT_FILE"
+
+wait
